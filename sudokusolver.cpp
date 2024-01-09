@@ -41,8 +41,13 @@ void printGrid(const vector<vector<int>>& grid, int size) {
     // iterate over grid rows
     for (int i = 0; i < size; i++) {
         // iterate over grid columns
-        for (int j = 0; j < size; j++)
+        for (int j = 0; j < size; j++){
+          if(grid[i][j] == 0){
+            cout<< ". ";
+            continue;
+          }
             cout << grid[i][j] << " "; // print grid cell value
+        }
         cout << endl; // end grid row
     }
 }
@@ -250,10 +255,15 @@ int main()
     vector<vector<int>> puzzle(9, vector<int>(9));
     for(int i = 0;i < 9;i++){
       for(int j = 0;j < 9;j++){
-        int temp;
+
+
+        char temp;
         cin >> temp;
-        if(temp >= 0 && temp <= 9){
-          puzzle[i][j] = temp;
+        if((temp - '0') > 0 && (temp - '0') <= 9){
+          puzzle[i][j] = temp - '0';
+        }
+        else if(temp == '.'){
+          puzzle[i][j] = 0;
         }
         else{
           cout << "Invalid value"<< endl;
