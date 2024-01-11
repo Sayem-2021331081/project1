@@ -47,7 +47,7 @@ void printGrid(const vector<vector<int>>& grid, int size) {
     }
 }
 
-bool isSafe(const vector<vector<int>>& grid, int row, int col, int num, int size) {
+bool isSafe(const vector<vector<char>>& grid, int row, int col, char num, int size) {
     // Check the number in the same row
     for (int x = 0; x < size; x++)
         if (grid[row][x] == num) return false;
@@ -79,14 +79,14 @@ bool findEmptyPosition(const vector<vector<int>>& grid, int& row, int& col, int 
     return false;
 }
 
-bool solveSudoku(vector<vector<int>>& grid, int size) {
+bool solveSudoku(vector<vector<char>>& grid, int size) {
     // find an empty cell to fill
     int row, col;
     if (!findEmptyPosition(grid, row, col, size))
         return true; // if no empty cell found, the puzzle is solved
 
     // iterate through all possible numbers for the current cell
-    for (int num = 1; num <= size; num++) {
+    for (char num = '1'; num <= '9'; num++) {
         // check if the current number is safe to place
         if (isSafe(grid, row, col, num, size)) {
             grid[row][col] = num; // place the current number in the cell
@@ -96,7 +96,7 @@ bool solveSudoku(vector<vector<int>>& grid, int size) {
                 return true;
 
             // undo the current choice if it leads to a dead-end
-            grid[row][col] = 0;
+            grid[row][col] = '.';
         }
     }
 
@@ -247,12 +247,12 @@ int main()
 
   else if(n == 2){ // submit puzzle Mode
     cout << "Enter the sudoku puzzle :"<< endl;
-    vector<vector<int>> puzzle(9, vector<int>(9));
+    vector<vector<char>> puzzle(9, vector<int>(9));
     for(int i = 0;i < 9;i++){
       for(int j = 0;j < 9;j++){
         int temp;
         cin >> temp;
-        if(temp >= 0 && temp <= 9){
+        if(temp >= '0' && temp <= '9'){
           puzzle[i][j] = temp;
         }
         else{
