@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sudoku Solver</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    #sudoku-container {
+      display: grid;
+      grid-template-columns: repeat(9, 40px);
+      grid-gap: 1px;
+      margin-bottom: 10px;
+    }
+
+    .cell {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2em;
+
+      grid-column-start: span 1;
+      grid-row-start: span 1;
+
+    }
+
+    #input-container {
+      text-align: center;
+    }
+
+    #solve-button,
+    #clear-button,
+    #check-button {
+      padding: 8px 16px;
+      font-size: 1em;
+      cursor: pointer;
+      margin: 5px;
+    }
+
+    input {
+      width: 30px;
+      text-align: center;
+      margin: 2px;
+    }
+
+    #result {
+      margin-top: 10px;
+    }
+
+    .sudoku-cell {
+      width: 30px;
+      height: 30px;
+      /* Use border for the cell content */
+      border: 1px solid black;
+      display: inline-block;
+      text-align: center;
+      line-height: 30px;
+      flex: 1;
+      min-width: 30px;
+      min-height: 30px;
+    }
+    </style>
+</head>
+
+<body>
+    <div id="sudoku-container"></div>
+    <div id="input-container">
+        <form id="sudoku-form">
+            <label>
+                <input type="radio" name="option" value="submit" checked> Submit Puzzle
+            </label>
+            <br>
+            <div id="input-grid"></div>
+            <br>
+            <button type="button" id="solve-button" onclick="submitPuzzle()">Submit</button>
+            <button type="button" onclick="clearInput()">Clear</button>
+            <div id="result"></div>
+        </form>
+    </div>
+
+    <script>
+        const MAX_SIZE = 9;
+
+        // Function to check if the Sudoku grid is valid
+    function isValidSudoku(grid) {
+    // Check each row
+    for (let row = 0; row < 9; row++) {
+        const rowSet = new Set();
+        for (let col = 0; col < 9; col++) {
+            const num = grid[row][col];
+            if (num !== 0) {
+                if (rowSet.has(num)) {
+                    return false;
+                } else {
+                    rowSet.add(num);
+                }
+            }
+        }
+    }
+
+    // Check each column
+    for (let col = 0; col < 9; col++) {
+        const colSet = new Set();
+        for (let row = 0; row < 9; row++) {
+            const num = grid[row][col];
+            if (num !== 0) {
+                if (colSet.has(num)) {
+                    return false;
+                } else {
+                    colSet.add(num);
+                }
+            }
+        }
+    }
+
+    // Check each 3x3 subgrid
+    for (let row = 0; row < 9; row += 3) {
+        for (let col = 0; col < 9; col += 3) {
+            const subgridSet = new Set();
+            for (let i = row; i < row + 3; i++) {
+                for (let j = col; j < col + 3; j++) {
+                    const num = grid[i][j];
+                    if (num !== 0) {
+                        if (subgridSet.has(num)) {
+                            return false;
+                        } else {
+                            subgridSet.add(num);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return true;
+}
+        function solveSudokuGrid(grid) {
+    const emptyCell = findEmptyCell(grid);
+    if (!emptyCell) return grid;
+
+    const [row, col] = emptyCell;
+
+    for (let num = 1; num <= 9; num++) {
+        if (isValidPlacement(grid, row, col, num)) {
+            grid[row][col] = num;
+
+            if (solveSudokuGrid(grid)) {
+                return grid;
+            }
+
+            grid[row][col] = 0;
+        }
+    }
+
+    return false;
+}
+
+function findEmptyCell(grid) {
+    for (let row = 0; row < 9; row++) {
+        for (let col = 0; col < 9; col++) {
+            if (grid[row][col] === 0) {
+                return [row, col];
+            }
+        }
+    }
+    return null;
+}
+
+function isValidPlacement(grid, row, col, num) {
+    // Check row
+    for (let i = 0; i < 9; i++) {
+        if (grid[row][i] === num) return false;
+    }
+
+    // Check column
+    for (let i = 0; i < 9; i++) {
+        if (grid[i][col] === num) return false;
+    }
+
+    // Check subgrid
+    const startRow = Math.floor(row / 3) * 3;
+    const startCol = Math.floor(col / 3) * 3;
+    for (let i = startRow; i < startRow + 3; i++) {
+        for (let j = startCol; j < startCol + 3; j++) {
+            if (grid[i][j] === num) return false;
+        }
+    }
+
+    return true;
+}
+
+        // Function to print the Sudoku grid
+        function printGrid(grid, size) {
+    const sudokuContainer = document.getElementById('sudoku-container');
+    sudokuContainer.innerHTML = '';
+
+    for (let i = 0; i < size; i++) {
+        for (let j = 0; j < size; j++) {
+            const cell = document.createElement('div');
+            cell.className = 'sudoku-cell';
+
+            // Set background color based on whether the cell is part of the original input or solution
+            if (grid[i][j] === 0) {
+                cell.classList.add('original-input');
+            } else {
+                cell.classList.add('solved-cell');
+            }
+
+            cell.textContent = grid[i][j];
+            sudokuContainer.appendChild(cell);
+        }
+    }
+}
+
+
+
+        // Function to submit the Sudoku puzzle and solve it
+        function submitPuzzle() {
+            const inputs = document.querySelectorAll('#input-grid input');
+            let index = 0;
+            const userGrid = new Array(MAX_SIZE).fill(0).map(() => new Array(MAX_SIZE).fill(0));
+
+            for (let i = 0; i < MAX_SIZE; i++) {
+                for (let j = 0; j < MAX_SIZE; j++) {
+                    const value = parseInt(inputs[index].value);
+                    userGrid[i][j] = isNaN(value) ? 0 : value;
+                    index++;
+                }
+            }
+
+            if (!isValidSudoku(userGrid)) {
+                document.getElementById('result').textContent = 'Invalid Sudoku puzzle!';
+                return;
+            }
+
+            const solvedGrid = solveSudokuGrid(userGrid);
+
+            printGrid(solvedGrid, MAX_SIZE);
+            document.getElementById('result').textContent = 'Sudoku solved!';
+        }
+
+        // Function to clear the input and result
+        function clearInput() {
+            const inputs = document.querySelectorAll('#input-grid input');
+            inputs.forEach(input => input.value = '');
+            document.getElementById('result').textContent = '';
+            document.getElementById('sudoku-container').innerHTML = '';
+        }
+
+        // Generate input grid
+        const inputGrid = document.getElementById('input-grid');
+        for (let i = 0; i < MAX_SIZE; i++) {
+            for (let j = 0; j < MAX_SIZE; j++) {
+                const input = document.createElement('input');
+                input.type = 'number';
+                input.min = 0;
+                input.max = 9;
+                input.value = '';
+                inputGrid.appendChild(input);
+            }
+            inputGrid.appendChild(document.createElement('br'));
+        }
+    </script>
+</body>
+
+</html>
